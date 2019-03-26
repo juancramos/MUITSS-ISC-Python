@@ -5,8 +5,9 @@ import json
 # load our API credentials
 # -----------------------------------------------------------------------
 import sys
+sys.path.append(".")
 import config
-PROJECT_PATH = config.data_directory
+PROJECT_PATH = config.data_path
 
 # -----------------------------------------------------------------------
 # create twitter streaming API object
@@ -20,7 +21,8 @@ stream = twitter.TwitterStream(auth=auth, secure=True)
 # -----------------------------------------------------------------------
 # iterate over tweets
 # -----------------------------------------------------------------------
-tweet_iter = stream.statuses.sample()
+tweet_iter = stream.statuses.filter(locations='-171.791110603, 18.91619, -66.96466, 71.3577635769')
+#tweet_iter = stream.statuses.sample()
 alltweets = []
 
 for tweet in tweet_iter:
@@ -34,5 +36,5 @@ for tweet in tweet_iter:
 
 print("Total tweets downloaded %s" % (len(alltweets)))
 
-with open('{}/{}.json'.format(PROJECT_PATH, "tweets"), 'w', encoding='utf8') as jsonFile:
+with open('{}\\{}.txt'.format(PROJECT_PATH, "tweets"), "w+", encoding='utf8') as jsonFile:
     json.dump(alltweets, jsonFile)
