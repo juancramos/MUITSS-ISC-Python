@@ -1,37 +1,38 @@
-from email.utils import parsedate
-from time import strftime
-from twitter import *
+import twitter
+import json
 
 # -----------------------------------------------------------------------
 # load our API credentials
 # -----------------------------------------------------------------------
 import sys
-sys.path.append(".")
 import config
+PROJECT_PATH = config.data_directory
 
 # -----------------------------------------------------------------------
 # create twitter streaming API object
 # -----------------------------------------------------------------------
-auth = OAuth(config.access_key,
+auth = twitter.OAuth(config.access_key,
              config.access_secret,
              config.consumer_key,
              config.consumer_secret)
-stream = TwitterStream(auth=auth, secure=True)
+stream = twitter.TwitterStream(auth=auth, secure=True)
 
 # -----------------------------------------------------------------------
 # iterate over tweets
 # -----------------------------------------------------------------------
 tweet_iter = stream.statuses.sample()
+alltweets = []
 
 for tweet in tweet_iter:
     try:
-        if tweet["lang"] == "en":
-            # turn the date string into a date object that python can handle
-            timestamp = parsedate(tweet["created_at"])
-
-            # now format this nicely into HH:MM:SS format
-            timetext = strftime("%H:%M:%S", timestamp)
-
-            print("%s" % (timetext), tweet["text"])
+        if(len(alltweets) > config.max_count):
+            break
+        if tweet["lang"] == "en" and tweet["place"] != None and tweet["place"]["country_code"] == "US":
+            alltweets.append(tweet)
     except:
         continue
+
+print("Total tweets downloaded %s" % (len(alltweets)))
+
+with open('{}/{}.json'.format(PROJECT_PATH, "tweets"), 'w', encoding='utf8') as jsonFile:
+    json.dump(alltweets, jsonFile)
